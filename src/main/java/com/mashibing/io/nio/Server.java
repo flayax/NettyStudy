@@ -14,14 +14,16 @@ public class Server {
     public static void main(String[] args) throws IOException {
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.socket().bind(new InetSocketAddress("127.0.0.1", 8888));
-        ssc.configureBlocking(false);
+        ssc.configureBlocking(false); // 设置为非阻塞
 
         System.out.println("server started, listening on :" + ssc.getLocalAddress());
-        Selector selector = Selector.open();
-        ssc.register(selector, SelectionKey.OP_ACCEPT);
+        Selector selector = Selector.open(); // 开启多路复用器selector
+        ssc.register(selector, SelectionKey.OP_ACCEPT); // channel注册selector，添加accept监听事件（The interest set for the resulting key）
 
+        // selector循环监听
         while(true) {
-            selector.select();
+            selector.select(); // 此处为阻塞方法
+            // 获取selector的所有监听事件集合（The selected-key set），轮循，触发时处理并从监听集合中移除该事件
             Set<SelectionKey> keys = selector.selectedKeys();
             Iterator<SelectionKey> it = keys.iterator();
             while(it.hasNext()) {
@@ -34,6 +36,7 @@ public class Server {
     }
 
     private static void handle(SelectionKey key) {
+        // accept事件
         if(key.isAcceptable()) {
             try {
                 ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
@@ -53,12 +56,13 @@ public class Server {
 					return;
 				}
 			}*/
-
+			    // 通道建立后，此channel再次注册selector，添加read监听事件
                 sc.register(key.selector(), SelectionKey.OP_READ );
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
             }
+            // read事件
         } else if (key.isReadable()) { //flip
             SocketChannel sc = null;
             try {
