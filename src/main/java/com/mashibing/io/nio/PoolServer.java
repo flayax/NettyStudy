@@ -38,7 +38,7 @@ public class PoolServer {
      * @throws IOException
      */
     public void initServer(int port) throws IOException {
-        // NIO通道的概念
+        // 构建NIO通道
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
         // 设置通道类型为非阻塞
         serverChannel.configureBlocking(false);
@@ -57,7 +57,7 @@ public class PoolServer {
      */
     @SuppressWarnings("unchecked")
     public void listen() throws IOException {
-        // 轮询访问selector  
+        // selector轮询监听事件
         while (true) {
             // 此处为阻塞方法，selector循环监听所有客户端事件，但并非IO的两个阶段（1、IO准备阶段，2、数据拷贝阶段）
             selector.select();
@@ -68,6 +68,10 @@ public class PoolServer {
                 ite.remove();
                 // 客户端链接事件（accept事件）
                 if (key.isAcceptable()) {
+                    /**
+                     * Returns the channel for which this key was created.  This method will
+                     * continue to return the channel even after the key is cancelled.
+                     */
                     ServerSocketChannel server = (ServerSocketChannel) key.channel();
                     // 客户端与服务端建立通道
                     SocketChannel channel = server.accept();

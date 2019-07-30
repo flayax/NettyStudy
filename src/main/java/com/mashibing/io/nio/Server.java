@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class Server {
     public static void main(String[] args) throws IOException {
-        // NIO通道的概念
+        // 构建NIO通道
         ServerSocketChannel ssc = ServerSocketChannel.open();
         // 绑定服务端ip和端口号
         ssc.socket().bind(new InetSocketAddress("127.0.0.1", 8888));
@@ -25,7 +25,7 @@ public class Server {
         Selector selector = Selector.open(); // 开启多路复用器selector
         ssc.register(selector, SelectionKey.OP_ACCEPT); // channel注册selector，添加accept监听事件（The interest set for the resulting key）
 
-        // selector循环监听
+        // selector轮询监听事件
         while(true) {
             selector.select(); // 此处为阻塞方法，selector循环监听所有客户端事件，但并非IO的两个阶段（1、IO准备阶段，2、数据拷贝阶段）
             // 获取selector的所有监听事件集合（The selected-key set），轮循，触发时处理并从监听集合中移除该事件
@@ -44,8 +44,14 @@ public class Server {
         // 客户端链接事件（accept事件）
         if(key.isAcceptable()) {
             try {
+                /**
+                 * Returns the channel for which this key was created.  This method will
+                 * continue to return the channel even after the key is cancelled.
+                 */
                 ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+                // 客户端与服务端建立通道
                 SocketChannel sc = ssc.accept();
+                // 设置通道类型为非阻塞
                 sc.configureBlocking(false);
                 //new Client
                 //

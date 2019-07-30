@@ -30,14 +30,17 @@ class NettyServer {
     }
 
     public void serverStart() {
-        //
+        // 相当于多路复用器selector工作组（线程池）
         EventLoopGroup bossGroup = new NioEventLoopGroup();
+        // 相当于读写工作组（线程池）
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+        // netty服务端初始化
         ServerBootstrap b = new ServerBootstrap();
-
+        // 关联两个工作组
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(NioServerSocketChannel.class) // 指定通道类型
                 .childHandler(new ChannelInitializer<SocketChannel>() {
+                    // 当有通道建立连接时，为该通道添加一个监听器，通过Handler进行具体逻辑处理
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline().addLast(new Handler());
