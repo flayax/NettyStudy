@@ -1,4 +1,4 @@
-package com.mashibing.io.nio.myself;
+package com.mashibing.io.nio.other;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
