@@ -10,6 +10,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.CharsetUtil;
 
+/**
+ * Netty封装了NIO，对外提供了类似AIO格式的接口，封装了原生态NIO接口的ByteBuffer，使其更加友好
+ * 未封装AIO是由于Linux底层NIO和AIO均使用epoll轮循方式，效率相同
+ */
 public class HelloNetty {
     public static void main(String[] args) {
         new NettyServer(8888).serverStart();
@@ -26,6 +30,7 @@ class NettyServer {
     }
 
     public void serverStart() {
+        //
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         ServerBootstrap b = new ServerBootstrap();

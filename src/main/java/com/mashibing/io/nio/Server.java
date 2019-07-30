@@ -10,11 +10,16 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * 单线程NIO多路复用
+ */
 public class Server {
     public static void main(String[] args) throws IOException {
+        // NIO通道的概念
         ServerSocketChannel ssc = ServerSocketChannel.open();
+        // 绑定服务端ip和端口号
         ssc.socket().bind(new InetSocketAddress("127.0.0.1", 8888));
-        ssc.configureBlocking(false); // 设置为非阻塞
+        ssc.configureBlocking(false); // 设置通道类型为非阻塞
 
         System.out.println("server started, listening on :" + ssc.getLocalAddress());
         Selector selector = Selector.open(); // 开启多路复用器selector
@@ -22,7 +27,7 @@ public class Server {
 
         // selector循环监听
         while(true) {
-            selector.select(); // 此处为阻塞方法
+            selector.select(); // 此处为阻塞方法，selector循环监听所有客户端事件，但并非IO的两个阶段（1、IO准备阶段，2、数据拷贝阶段）
             // 获取selector的所有监听事件集合（The selected-key set），轮循，触发时处理并从监听集合中移除该事件
             Set<SelectionKey> keys = selector.selectedKeys();
             Iterator<SelectionKey> it = keys.iterator();
@@ -36,7 +41,7 @@ public class Server {
     }
 
     private static void handle(SelectionKey key) {
-        // accept事件
+        // 客户端链接事件（accept事件）
         if(key.isAcceptable()) {
             try {
                 ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
@@ -62,12 +67,12 @@ public class Server {
                 e.printStackTrace();
             } finally {
             }
-            // read事件
+            // 读数据事件（read事件）
         } else if (key.isReadable()) { //flip
             SocketChannel sc = null;
             try {
                 sc = (SocketChannel)key.channel();
-                ByteBuffer buffer = ByteBuffer.allocate(512);
+                ByteBuffer buffer = ByteBuffer.allocate(512); // ByteBuffer非常不好用
                 buffer.clear();
                 int len = sc.read(buffer);
 
